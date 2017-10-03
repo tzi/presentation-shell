@@ -8,13 +8,30 @@ const template = require('./template');
 
 function presentationCreator(templateFileName) {
     const headerSelector = 'h1, h2, h3, h4, h5, h6';
+    const contentParameterRegexp = /^@([a-zA-Z]+) (.*)$/;
+
+    function isAContentParameter($cursor) {
+        const $next = $cursor.next();
+        if ($next.get(0).tagName !== 'p') {
+            return false;
+        }
+
+        return contentParameterRegexp.test($cursor.next().text());
+    }
 
     function getSlideParameters($, $cursor, page) {
-        const title = $cursor.text().trim();
-        const type = $cursor.get(0).tagName.slice(1);
-        const content = $cursor.nextUntil(headerSelector).toArray().map(element => $.html(element)).join("\n");
+        const parameters = {};
+        parameters.title = $cursor.text().trim();
+        parameters.level = $cursor.get(0).tagName.slice(1);
+        while (isAContentParameter($cursor)) {
+            $cursor = $cursor.next();
+            const [, key, value] = contentParameterRegexp.exec($cursor.text());
+            parameters[key] = value;
+        }
+        parameters.content = $cursor.nextUntil(headerSelector).toArray().map(element => $.html(element)).join("\n");
+        parameters.page = page;
 
-        return {title, content, type, page};
+        return parameters;
     }
 
     function getParameters(fileName) {
