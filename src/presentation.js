@@ -12,7 +12,7 @@ function presentationCreator(templateFileName) {
 
     function isAContentParameter($cursor) {
         const $next = $cursor.next();
-        if ($next.get(0).tagName !== 'p') {
+        if (!$next.get(0) || $next.get(0).tagName !== 'p') {
             return false;
         }
 
