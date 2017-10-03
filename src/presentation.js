@@ -16,7 +16,19 @@ function presentationCreator(templateFileName) {
             return false;
         }
 
-        return contentParameterRegexp.test($cursor.next().text());
+        return $cursor.next().text().split("\n").every(function(line) {
+            return contentParameterRegexp.test(line);
+        });
+    }
+
+    function getContentParameters($cursor) {
+        const parameters = {};
+        $cursor.text().split("\n").forEach(function(line) {
+            const [, key, value] = contentParameterRegexp.exec(line);
+            parameters[key] = value;
+        });
+
+        return parameters;
     }
 
     function getSlideParameters($, $cursor, page) {
@@ -25,8 +37,7 @@ function presentationCreator(templateFileName) {
         parameters.level = parseInt($cursor.get(0).tagName.slice(1)) || false;
         while (isAContentParameter($cursor)) {
             $cursor = $cursor.next();
-            const [, key, value] = contentParameterRegexp.exec($cursor.text());
-            parameters[key] = value;
+            Object.assign(parameters, getContentParameters($cursor));
         }
         parameters.content = $cursor.nextUntil(slideSeparator).toArray().map(element => $.html(element)).join("\n");
         parameters.page = page;
