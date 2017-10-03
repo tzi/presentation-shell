@@ -7,11 +7,12 @@ const cheerio = require('cheerio');
 const template = require('./template');
 
 function presentationCreator(templateFileName) {
+    const headerSelector = 'h1, h2, h3, h4, h5, h6';
 
     function getSlideParameters($, $cursor, page) {
         const title = $cursor.text().trim();
         const type = $cursor.get(0).tagName.slice(1);
-        const content = $cursor.nextUntil('h2').toArray().map(element => $.html(element)).join("\n");
+        const content = $cursor.nextUntil(headerSelector).toArray().map(element => $.html(element)).join("\n");
 
         return {title, content, type, page};
     }
@@ -24,7 +25,7 @@ function presentationCreator(templateFileName) {
         const name = path.basename(fileName).slice(0, -path.extname(fileName).length);
         const slides = [];
 
-        $cursor = $('h1, h2, h3, h4, h5, h6').first();
+        $cursor = $(headerSelector).first();
         let slide = {};
         let titleCount = 1;
         while ($cursor.length) {
@@ -41,7 +42,7 @@ function presentationCreator(templateFileName) {
                 }
             }
             slides.push(slide);
-            $cursor = $cursor.nextAll('h1, h2, h3, h4, h5, h6').first();
+            $cursor = $cursor.nextAll(headerSelector).first();
         }
 
         return {title, name, slides};
