@@ -7,7 +7,7 @@ const cheerio = require('cheerio');
 const template = require('./template');
 
 function presentationCreator(templateFileName) {
-    const headerSelector = 'h1, h2, h3, h4, h5, h6';
+    const slideSeparator = 'h1, h2, h3, h4, h5, h6, hr';
     const contentParameterRegexp = /^@([a-zA-Z]+) (.*)$/;
 
     function isAContentParameter($cursor) {
@@ -22,13 +22,13 @@ function presentationCreator(templateFileName) {
     function getSlideParameters($, $cursor, page) {
         const parameters = {};
         parameters.title = $cursor.text().trim();
-        parameters.level = $cursor.get(0).tagName.slice(1);
+        parameters.level = parseInt($cursor.get(0).tagName.slice(1)) || false;
         while (isAContentParameter($cursor)) {
             $cursor = $cursor.next();
             const [, key, value] = contentParameterRegexp.exec($cursor.text());
             parameters[key] = value;
         }
-        parameters.content = $cursor.nextUntil(headerSelector).toArray().map(element => $.html(element)).join("\n");
+        parameters.content = $cursor.nextUntil(slideSeparator).toArray().map(element => $.html(element)).join("\n");
         parameters.page = page;
 
         return parameters;
@@ -42,7 +42,7 @@ function presentationCreator(templateFileName) {
         const name = path.basename(fileName).slice(0, -path.extname(fileName).length);
         const slides = [];
 
-        $cursor = $(headerSelector).first();
+        $cursor = $(slideSeparator).first();
         let slide = {};
         let titleCount = 1;
         while ($cursor.length) {
@@ -59,7 +59,7 @@ function presentationCreator(templateFileName) {
                 }
             }
             slides.push(slide);
-            $cursor = $cursor.nextAll(headerSelector).first();
+            $cursor = $cursor.nextAll(slideSeparator).first();
         }
 
         return {title, name, slides};
