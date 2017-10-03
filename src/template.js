@@ -1,5 +1,8 @@
 const fs = require('fs');
 const Handlebars = require('handlebars');
+require('handlebars-helpers')({
+    handlebars: Handlebars
+});
 
 function templateCreator(templateFile) {
     let template;
