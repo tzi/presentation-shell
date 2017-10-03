@@ -24,7 +24,7 @@ function presentationCreator(templateFileName) {
         const name = path.basename(fileName).slice(0, -path.extname(fileName).length);
         const slides = [];
 
-        $cursor = $('h1, h2').first();
+        $cursor = $('h1, h2, h3, h4, h5, h6').first();
         let slide = {};
         let titleCount = 1;
         while ($cursor.length) {
@@ -41,7 +41,7 @@ function presentationCreator(templateFileName) {
                 }
             }
             slides.push(slide);
-            $cursor = $cursor.nextAll('h1, h2').first();
+            $cursor = $cursor.nextAll('h1, h2, h3, h4, h5, h6').first();
         }
 
         return {title, name, slides};
